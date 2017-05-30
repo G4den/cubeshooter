@@ -5,8 +5,12 @@ using UnityEngine.UI;
 
 public class GM : MonoBehaviour
 {
+    public bool lastCol;
+    public bool ColorChanged;
     public bool GameOver;
-
+    public float Score;
+    public float LerpedScore;
+    public Text ScoreText;
     public Image[] nextColorBar;
     public float enemySpeed;
     public float timeBetweenEnemies;
@@ -18,6 +22,11 @@ public class GM : MonoBehaviour
     public Color color;
     public Color NextColor;
     public Color lerpedColor;
+    public bool ShowGameOver;
+    public Animator HighscoreObject;
+    public bool justStarted;
+    public Text GoScore;
+    public Text GoHighScore;
 
     //public static color lerprgb(color a, color b, float t)
     //{
@@ -31,6 +40,25 @@ public class GM : MonoBehaviour
     //}
     private void Update()
     {
+        if (GameOver && ShowGameOver == false)
+        {
+            ShowGameOver = true;
+            if (Score > PlayerPrefs.GetFloat("HS"))
+            {
+                PlayerPrefs.SetFloat("HS", Score);
+            }
+            GoScore.text = "Score: " + Score.ToString();
+            GoHighScore.text = "Highscore: " + PlayerPrefs.GetFloat("HS");
+            HighscoreObject.Play("In");
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Application.LoadLevel(0);
+        }
+
+        LerpedScore = Mathf.Lerp(LerpedScore, Score, Time.deltaTime * 10);
+        ScoreText.text = LerpedScore.ToString("F0"); 
         for (int i = 0; i < nextColorBar.Length; i++)
         {
             nextColorBar[i].fillAmount = Mathf.Lerp(nextColorBar[i].fillAmount, killCounter / 10.0f, Time.deltaTime * 10);
@@ -42,8 +70,16 @@ public class GM : MonoBehaviour
             Map.color = color;
             killCounter = 10;
             ranomizeColor();
+            ColorChanged = true;
+            StartCoroutine(JustChangedColor());
         }
 
+    }
+
+    IEnumerator JustChangedColor()
+    {
+        yield return new WaitForSeconds(1);
+        ColorChanged = false;
     }
 
     void Start()
@@ -63,33 +99,63 @@ public class GM : MonoBehaviour
         switch (number)
         {
             case 0:
-                NextColor = new Color(255, 0, 0); break;
+                if (color == new Color(255, 0, 0))
+                {
+                    NextColor = new Color(0, 255, 0); break;
+                }
+                else{
+                    NextColor = new Color(255, 0, 0); break;
+                }
+
             case 1:
-                NextColor = new Color(0, 255, 0); break;
+                if (color == new Color(0, 255, 0))
+                {
+                    NextColor = new Color(0, 0, 255); break;
+                }
+                else
+                {
+                    NextColor = new Color(0, 255, 0); break;
+                }
             case 2:
-                NextColor = new Color(0, 0, 255); break;
+                if (color == new Color(0, 0, 255))
+                {
+                    NextColor = new Color(255, 0, 0); break;
+                }
+                else
+                {
+                    NextColor = new Color(0, 0,255); break;
+                }
         }
     }
 
     IEnumerator EnemySpawner()
     {
+        if (justStarted)
+        {
+            yield return new WaitForSeconds(2);
+            justStarted = false;
+        }
         if (!GameOver)
         {
-            if (timeBetweenEnemies > 0.2)
+            if (ColorChanged == false)
             {
-                timeBetweenEnemies = timeBetweenEnemies / 1.005f;
-            }
+                if (timeBetweenEnemies > 0.15)
+                {
+                    timeBetweenEnemies = timeBetweenEnemies / 1.002f;
+                }
 
-            if (enemySpeed < 80)
-            {
-                enemySpeed = enemySpeed * 1.003f;
-            }
+                if (enemySpeed < 100)
+                {
+                    enemySpeed = enemySpeed * 1.002f;
+                }
 
-            GameObject enemy;
-            enemy = Instantiate(Enemy) as GameObject;
-            enemy.transform.position = enemySpawnPos[Random.Range(0, 4)].position;
-            enemy.GetComponent<Enemy>().speed = enemySpeed;
-            yield return new WaitForSeconds(timeBetweenEnemies);
+                GameObject enemy;
+                enemy = Instantiate(Enemy) as GameObject;
+                enemy.transform.position = enemySpawnPos[Random.Range(0, 4)].position;
+                enemy.GetComponent<Enemy>().speed = enemySpeed;
+                yield return new WaitForSeconds(timeBetweenEnemies);
+            }
+            yield return null;
             StartCoroutine(EnemySpawner());
         }
     }

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
+# Visual Studio 2015
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cubeshooter", "cubeshooter.csproj", "{DDCAE2A5-089F-63F0-D9F9-6578566BEB46}"
 EndProject
 Global

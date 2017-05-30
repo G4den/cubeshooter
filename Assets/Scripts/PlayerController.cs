@@ -4,16 +4,21 @@ using UnityEngine;
 using UnityEngine.UI;
 public class PlayerController : MonoBehaviour {
 
+    AudioSource AudioS;
+    public AudioClip GunSound;
     public GM GameManager;
     public Animator muzzleFlash;
     public Transform barrelTransform;
     public int bulletspeed;
     public GameObject BulletPrefab;
-    public Text AmmoText;
 
-	// Update is called once per frame
-	void Update () {
-        AmmoText.text = GameManager.bullets.ToString();
+    private void Start()
+    {
+        AudioS = GetComponent<AudioSource>();
+    }
+
+    // Update is called once per frame
+    void Update () {
 
         if (Input.GetKeyDown(KeyCode.W))
         {
@@ -39,8 +44,9 @@ public class PlayerController : MonoBehaviour {
 
     void Shoot(int rotation, Vector2 bulletforce)
     {
-        if (GameManager.GameOver != true)
+        if (GameManager.GameOver != true && GameManager.ColorChanged == false)
         {
+            AudioS.PlayOneShot(GunSound);
             Camera.main.GetComponent<PerlinShake>().PlayShake();
             GameManager.bullets--;
             muzzleFlash.Play("MuzzleFlash");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour {
+    bool dead;
     Color FloorStartColor;
     public GM GameManager;
     Color color;
@@ -35,9 +36,15 @@ public class Enemy : MonoBehaviour {
 
     void Update()
     {
+        if (dead)
+        {
+            GetComponent<BoxCollider2D>().enabled = false;
+            transform.localScale = new Vector3(Mathf.Lerp(transform.localScale.x, 0, Time.deltaTime * 10), Mathf.Lerp(transform.localScale.y, 0, Time.deltaTime * 10), Mathf.Lerp(transform.localScale.z, 0, Time.deltaTime * 10));
+        }
+
         if(FloorStartColor != GameManager.color)
         {
-            Destroy(this.gameObject);
+            dead = true;
         }
         float step = speed * Time.deltaTime;
         transform.position = Vector3.MoveTowards(transform.position, target.position, step);
@@ -49,15 +56,19 @@ public class Enemy : MonoBehaviour {
         if(collision.tag == "Bullet" && color == GameManager.color)
         {
             GameManager.killCounter--;
-            GameManager.bullets++;
             Destroy(collision.gameObject);
-            Destroy(this.gameObject);
+            GameManager.Score += 100;
+            dead = true;
         }
         
-        if(collision.tag == "Player" && color == GameManager.color)
+        if(collision.tag == "Player" && color == GameManager.color && !dead)
         {
             GameManager.GameOver = true;
-            Destroy(this.gameObject);
+            dead = true;
+        }
+        if(collision.tag != "Bullet")
+        {
+            dead = true;
         }
     }
 }
