@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour {
+    public bool sameAsFloor;
     bool dead;
-    Color FloorStartColor;
+    public Color FloorStartColor;
     public GM GameManager;
-    Color color;
+    public Color color;
     Transform target;
     public float speed;
-
+    bool playerColl;
     private void Start()
     {
         ranomizeColor();
@@ -32,10 +33,24 @@ public class Enemy : MonoBehaviour {
             case 2:
                 color = new Color(0, 0, 255); break;
         }
+
+        int radomizer = Random.Range(0, 3);
+        {
+            if(radomizer == 1)
+            {
+                sameAsFloor = true;
+            }
+        }
     }
 
     void Update()
     {
+        if (sameAsFloor)
+        {
+            color = FloorStartColor;
+            GetComponent<SpriteRenderer>().color = color;
+        }
+
         if (dead)
         {
             GetComponent<BoxCollider2D>().enabled = false;
@@ -46,8 +61,11 @@ public class Enemy : MonoBehaviour {
         {
             dead = true;
         }
-        float step = speed * Time.deltaTime;
-        transform.position = Vector3.MoveTowards(transform.position, target.position, step);
+        if (!dead || playerColl) {
+            float step = speed * Time.deltaTime;
+            transform.position = Vector3.MoveTowards(transform.position, target.position, step);
+        }
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -68,6 +86,7 @@ public class Enemy : MonoBehaviour {
         }
         if(collision.tag != "Bullet")
         {
+            playerColl = true;
             dead = true;
         }
     }

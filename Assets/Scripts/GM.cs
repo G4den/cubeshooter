@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class GM : MonoBehaviour
 {
+    public Animator transistion;
     public bool lastCol;
     public bool ColorChanged;
     public bool GameOver;
@@ -38,6 +39,13 @@ public class GM : MonoBehaviour
     //        a.a + (b.a - a.a) * t
     //    );
     //}
+
+    IEnumerator RestartGame()
+    {
+        transistion.Play("RightToLeft");
+        yield return new WaitForSeconds(1);
+        Application.LoadLevel(0);
+    }
     private void Update()
     {
         if (GameOver && ShowGameOver == false)
@@ -47,14 +55,15 @@ public class GM : MonoBehaviour
             {
                 PlayerPrefs.SetFloat("HS", Score);
             }
+            HighscoreObject.Play("In");
             GoScore.text = "Score: " + Score.ToString();
             GoHighScore.text = "Highscore: " + PlayerPrefs.GetFloat("HS");
-            HighscoreObject.Play("In");
+            ScoreText.GetComponent<Animator>().Play("ScoreTextOut");
         }
 
         if (Input.GetKeyDown(KeyCode.R))
         {
-            Application.LoadLevel(0);
+            StartCoroutine(RestartGame());
         }
 
         LerpedScore = Mathf.Lerp(LerpedScore, Score, Time.deltaTime * 10);
@@ -78,7 +87,7 @@ public class GM : MonoBehaviour
 
     IEnumerator JustChangedColor()
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(.5f);
         ColorChanged = false;
     }
 
